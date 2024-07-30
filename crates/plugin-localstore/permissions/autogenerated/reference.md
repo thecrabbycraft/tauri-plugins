@@ -11,7 +11,7 @@
 <tr>
 <td>
 
-`essential:allow-toggle-devtools`
+`localstore:allow-toggle-devtools`
 
 </td>
 <td>
@@ -24,7 +24,7 @@ Enables the toggle_devtools command without any pre-configured scope.
 <tr>
 <td>
 
-`essential:deny-toggle-devtools`
+`localstore:deny-toggle-devtools`
 
 </td>
 <td>
