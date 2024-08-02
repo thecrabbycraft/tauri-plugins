@@ -16,10 +16,10 @@ publish = true
 workspace = true
 
 [build-dependencies]
-tauri-plugin = { version = "2.0.0-beta.19", features = ["build"] }
+tauri-plugin = { version = "2.0.0-rc.0", features = ["build"] }
 
 [dependencies]
-tauri = { version = "2.0.0-beta.24", features = ["devtools"] }
+tauri = { version = "2.0.0-rc.0", features = ["devtools"] }
 log = "^0.4"
 rusqlite = { version = "0.31", features = [ "bundled-sqlcipher" ] }
 rusqlite_migration = "1.2"

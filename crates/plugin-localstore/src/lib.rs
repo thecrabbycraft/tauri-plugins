@@ -26,13 +26,14 @@ pub use store::*;
 // Re-export rusqlite_migration
 pub use rusqlite_migration::{Migrations, M};
 
-use tauri::plugin::{Builder, TauriPlugin};
+use tauri::plugin::Builder as PluginBuilder;
+use tauri::plugin::TauriPlugin;
 use tauri::Runtime;
 
 pub const DEFAULT_NAMESPACE_NAME: &str = "localstore";
 
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
-    Builder::new("localstore")
+    PluginBuilder::new("localstore")
         .setup(|_app, _api| Ok(()))
         .invoke_handler(tauri::generate_handler![])
         .on_navigation(|window, url| {

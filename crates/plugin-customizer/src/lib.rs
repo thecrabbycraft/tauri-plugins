@@ -19,11 +19,12 @@ mod cmd;
 pub mod theme;
 pub mod utils;
 
-use tauri::plugin::{Builder, TauriPlugin};
+use tauri::plugin::Builder as PluginBuilder;
+use tauri::plugin::TauriPlugin;
 use tauri::Runtime;
 
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
-    Builder::new("customizer")
+    PluginBuilder::new("customizer")
         .setup(|_app, _api| Ok(()))
         .invoke_handler(tauri::generate_handler![
             cmd::list_font_mono,

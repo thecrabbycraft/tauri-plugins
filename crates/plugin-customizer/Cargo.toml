@@ -16,12 +16,12 @@ publish = true
 workspace = true
 
 [build-dependencies]
-tauri-plugin = { version = "2.0.0-beta.19", features = ["build"] }
+tauri-plugin = { version = "2.0.0-rc.0", features = ["build"] }
 
 [dependencies]
-tauri = { version = "2.0.0-beta.24", features = ["devtools"] }
-tauri-plugin-dialog = "2.0.0-beta.11"
-tauri-plugin-shell = "2.0.0-beta.9"
+tauri = { version = "2.0.0-rc.0", features = ["devtools"] }
+tauri-plugin-dialog = "2.0.0-rc.0"
+tauri-plugin-shell = "2.0.0-rc.0"
 
 anyhow = "1.0"
 font-kit = "0.14.1"

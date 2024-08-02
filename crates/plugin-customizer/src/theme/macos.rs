@@ -16,8 +16,8 @@ use tauri::{AppHandle, Emitter, Manager, Runtime, WebviewWindow};
 use super::{save_theme_value, Theme};
 
 // Default position for macOS traffic lights
-const WINDOW_CONTROL_PAD_X: f64 = 12.0;
-const WINDOW_CONTROL_PAD_Y: f64 = 16.4;
+const CONTROL_PADDING_X: f64 = 12.0;
+const CONTROL_PADDING_Y: f64 = 16.4;
 
 // #region Tauri theme
 #[tauri::command(rename_all = "snake_case")]
@@ -103,8 +103,8 @@ pub fn set_traffic_light_position<R: Runtime>(
     use objc::runtime::{Object, Sel};
     use std::ffi::c_void;
 
-    let traffic_light_padding_x = padding_x.unwrap_or(WINDOW_CONTROL_PAD_X);
-    let traffic_light_padding_y = padding_y.unwrap_or(WINDOW_CONTROL_PAD_Y);
+    let traffic_light_padding_x = padding_x.unwrap_or(CONTROL_PADDING_X);
+    let traffic_light_padding_y = padding_y.unwrap_or(CONTROL_PADDING_Y);
 
     // Do the initial positioning
     position_traffic_lights(
