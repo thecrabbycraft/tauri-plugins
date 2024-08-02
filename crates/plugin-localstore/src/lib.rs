@@ -8,15 +8,33 @@
 
 mod cmd;
 
+mod builder;
+pub use builder::*;
+
+mod adapter;
+pub use adapter::*;
+
+mod errors;
+pub use errors::*;
+
+mod keyv;
+pub use keyv::*;
+
+mod store;
+pub use store::*;
+
+// Re-export rusqlite_migration
+pub use rusqlite_migration::{Migrations, M};
+
 use tauri::plugin::{Builder, TauriPlugin};
 use tauri::Runtime;
 
-use cmd::toggle_devtools;
+pub const DEFAULT_NAMESPACE_NAME: &str = "localstore";
 
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("localstore")
         .setup(|_app, _api| Ok(()))
-        .invoke_handler(tauri::generate_handler![toggle_devtools])
+        .invoke_handler(tauri::generate_handler![])
         .on_navigation(|window, url| {
             log::debug!("navigation {} {url}", window.label());
             true

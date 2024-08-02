@@ -6,7 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-const COMMANDS: &[&str] = &["toggle_devtools"];
+const COMMANDS: &[&str] = &[];
 
 fn main() {
     tauri_plugin::Builder::new(COMMANDS)
