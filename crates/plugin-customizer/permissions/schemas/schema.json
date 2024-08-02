@@ -295,6 +295,118 @@
       "type": "string",
       "oneOf": [
         {
+          "description": "allow-get-theme -> Enables the get_theme command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "allow-get-theme"
+          ]
+        },
+        {
+          "description": "deny-get-theme -> Denies the get_theme command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "deny-get-theme"
+          ]
+        },
+        {
+          "description": "allow-list-font-mono -> Enables the list_font_mono command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "allow-list-font-mono"
+          ]
+        },
+        {
+          "description": "deny-list-font-mono -> Denies the list_font_mono command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "deny-list-font-mono"
+          ]
+        },
+        {
+          "description": "allow-list-font-sans -> Enables the list_font_sans command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "allow-list-font-sans"
+          ]
+        },
+        {
+          "description": "deny-list-font-sans -> Denies the list_font_sans command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "deny-list-font-sans"
+          ]
+        },
+        {
+          "description": "allow-open-data-directory -> Enables the open_data_directory command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "allow-open-data-directory"
+          ]
+        },
+        {
+          "description": "deny-open-data-directory -> Denies the open_data_directory command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "deny-open-data-directory"
+          ]
+        },
+        {
+          "description": "allow-open-in-browser -> Enables the open_in_browser command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "allow-open-in-browser"
+          ]
+        },
+        {
+          "description": "deny-open-in-browser -> Denies the open_in_browser command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "deny-open-in-browser"
+          ]
+        },
+        {
+          "description": "allow-open-log-directory -> Enables the open_log_directory command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "allow-open-log-directory"
+          ]
+        },
+        {
+          "description": "deny-open-log-directory -> Denies the open_log_directory command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "deny-open-log-directory"
+          ]
+        },
+        {
+          "description": "allow-open-log-file -> Enables the open_log_file command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "allow-open-log-file"
+          ]
+        },
+        {
+          "description": "deny-open-log-file -> Denies the open_log_file command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "deny-open-log-file"
+          ]
+        },
+        {
+          "description": "allow-set-theme -> Enables the set_theme command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "allow-set-theme"
+          ]
+        },
+        {
+          "description": "deny-set-theme -> Denies the set_theme command without any pre-configured scope.",
+          "type": "string",
+          "enum": [
+            "deny-set-theme"
+          ]
+        },
+        {
           "description": "allow-toggle-devtools -> Enables the toggle_devtools command without any pre-configured scope.",
           "type": "string",
           "enum": [
