@@ -17,7 +17,7 @@ use serde::Serialize;
 use serde_json::{json, Value};
 use std::sync::Arc;
 
-use super::{KeyvError, Store, StoreError};
+use super::{KeyvError, Store, StoreError, StoreModel};
 
 pub(super) const DEFAULT_NAMESPACE_NAME: &str = "localstore";
 
@@ -187,6 +187,26 @@ impl Keyv {
     /// ```
     pub async fn get(&self, key: &str) -> Result<Option<Value>, KeyvError> {
         Ok(self.store.get(key).await?)
+    }
+
+    /// Lists all key-value pairs stored in the Keyv store.
+    ///
+    /// # Returns
+    ///
+    /// Returns a `Result` containing a `Vec` of tuples, where each tuple contains the key (as a `String`) and the corresponding value (as a `Value`). If an error occurs, a `KeyvError` is returned.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use keyv::Keyv;
+    /// let keyv = Keyv::default();
+    /// let pairs = keyv.list().await.unwrap();
+    /// for (key, value) in pairs {
+    ///     println!("Key: {}, Value: {}", key, value);
+    /// }
+    /// ```
+    pub async fn list(&self) -> Result<Vec<StoreModel>, KeyvError> {
+        Ok(self.store.list().await?)
     }
 
     /// Removes a specified key from the store.

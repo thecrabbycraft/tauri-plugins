@@ -21,6 +21,8 @@ use std::pin::Pin;
 use std::sync::Arc;
 use std::time::Instant;
 
+use crate::keyv::StoreModel;
+
 use super::DEFAULT_NAMESPACE_NAME;
 use super::{Store, StoreError};
 
@@ -236,6 +238,50 @@ impl Store for KeyvStore {
             log::debug!("Keyv store get: {:?} | {} | {:?}", duration, key, value);
 
             Ok(Some(value))
+        })
+    }
+
+    fn list(&self) -> Pin<Box<dyn Future<Output = Result<Vec<StoreModel>, StoreError>> + Send + '_>> {
+        let query = format!("SELECT key, value FROM {} ORDER BY key ASC;", self.get_table_name());
+
+        let conn = &*self.connnection;
+
+        Box::pin(async move {
+            let start = Instant::now();
+
+            let mut stmt = conn
+                .prepare(&query)
+                .await
+                .map_err(|e| StoreError::QueryError(format!("Failed to set the statement: {:?}", e)))?;
+
+            let mut results = stmt
+                .query(params![])
+                .await
+                .map_err(|e| StoreError::QueryError(format!("Failed to fetch the value: {:?}", e)))?;
+
+            let mut items: Vec<StoreModel> = Vec::new();
+
+            while let Some(row) = results
+                .next()
+                .await
+                .map_err(|e| StoreError::QueryError(format!("Failed to iterate rows: {:?}", e)))?
+            {
+                let key: String = row
+                    .get(0)
+                    .map_err(|e| StoreError::QueryError(format!("Failed to get the value: {:?}", e)))?;
+                let row_value: String = row
+                    .get(1)
+                    .map_err(|e| StoreError::QueryError(format!("Failed to get the value: {:?}", e)))?;
+                let value =
+                    serde_json::to_value(row_value).map_err(|e| StoreError::SerializationError { source: e })?;
+
+                items.push(StoreModel { key, value });
+            }
+
+            let duration = start.elapsed();
+            log::debug!("Keyv store list: {:?} | {:?}", duration, items);
+
+            Ok(items)
         })
     }
 

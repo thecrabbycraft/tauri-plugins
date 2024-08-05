@@ -13,9 +13,16 @@
  * Credits to Alexandru Bereghici: https://github.com/chrisllontop/keyv-rust
  */
 
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::future::Future;
 use std::pin::Pin;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct StoreModel {
+    pub key: String,
+    pub value: Value,
+}
 
 pub trait Store: Send + Sync {
     /// Initializes the storage backend.
@@ -37,6 +44,13 @@ pub trait Store: Send + Sync {
     /// - `Ok(None)` if the key does not exist.
     /// - `Err(StoreError)` if there is an error retrieving the value.
     fn get(&self, key: &str) -> Pin<Box<dyn Future<Output = Result<Option<Value>, StoreError>> + Send + '_>>;
+
+    /// Lists all key-value pairs stored in the store.
+    ///
+    /// # Returns
+    /// - `Ok(Vec<StoreModel>)` containing all the key-value pairs in the store.
+    /// - `Err(StoreError)` if there is an error listing the key-value pairs.
+    fn list(&self) -> Pin<Box<dyn Future<Output = Result<Vec<StoreModel>, StoreError>> + Send + '_>>;
 
     /// Sets a value for a given key in the store, with an optional time-to-live (TTL).
     ///
