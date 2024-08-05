@@ -6,12 +6,10 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-pub mod keyv;
-pub mod migration;
-pub mod sql;
+mod adapter;
+mod keyv;
+mod store;
 
-mod plugin;
-pub use plugin::*;
-
-mod utils;
-pub use utils::*;
+pub use adapter::*;
+pub use keyv::*;
+pub use store::*;

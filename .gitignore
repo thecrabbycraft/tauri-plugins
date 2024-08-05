@@ -35,8 +35,3 @@ target/
 # envars
 .env*
 !.env.*example
-
-# Project specific
-# generated/*
-example.sql
-depgraph.png

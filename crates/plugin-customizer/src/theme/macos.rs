@@ -16,8 +16,8 @@ use tauri::{AppHandle, Emitter, Manager, Runtime, WebviewWindow};
 use super::{save_theme_value, Theme};
 
 // Default position for macOS traffic lights
-const CONTROL_PADDING_X: f64 = 12.0;
-const CONTROL_PADDING_Y: f64 = 16.4;
+const CONTROL_PADDING_X: f64 = 11.4;
+const CONTROL_PADDING_Y: f64 = 16.1;
 
 // #region Tauri theme
 #[tauri::command(rename_all = "snake_case")]

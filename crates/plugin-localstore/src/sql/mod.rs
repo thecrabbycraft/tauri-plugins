@@ -6,12 +6,5 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-pub mod keyv;
-pub mod migration;
-pub mod sql;
-
-mod plugin;
-pub use plugin::*;
-
-mod utils;
-pub use utils::*;
+// Re-export all items from the libsql crate to make them available in this module.
+pub use libsql::*;

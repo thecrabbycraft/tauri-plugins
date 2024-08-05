@@ -1,3 +1,11 @@
+// Copyright © 2024 Crabby Craft - All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
+
 /*!
  * Portions of this file are based on code from `chrisllontop/keyv-rust`.
  * MIT Licensed, Copyright (c) 2023 Christian Llontop.
@@ -9,7 +17,9 @@ use serde::Serialize;
 use serde_json::{json, Value};
 use std::sync::Arc;
 
-use super::{KeyvError, Store};
+use super::{KeyvError, Store, StoreError};
+
+pub(super) const DEFAULT_NAMESPACE_NAME: &str = "localstore";
 
 /// Key-Value Store Interface
 ///
@@ -55,6 +65,7 @@ use super::{KeyvError, Store};
 /// }
 /// ```
 pub struct Keyv {
+    // store: Arc<Box<dyn Store>>,
     store: Arc<dyn Store>,
 }
 
@@ -86,8 +97,8 @@ impl Keyv {
     ///
     /// let keyv = Keyv::try_new(store).unwrap();
     /// ```
-    pub fn try_new<S: Store + 'static>(store: S) -> Result<Self, KeyvError> {
-        store.initialize()?;
+    pub async fn try_new<S: Store + 'static>(store: S) -> Result<Self, KeyvError> {
+        store.initialize().await?;
         Ok(Self { store: Arc::new(store) })
     }
 
@@ -109,8 +120,10 @@ impl Keyv {
     /// let keyv = Keyv::default();
     /// keyv.set("key", "hello world").unwrap();
     /// ```
-    pub fn set<T: Serialize>(&self, key: &str, value: T) -> Result<(), KeyvError> {
-        Ok(self.store.set(key, json!(value), None)?)
+    pub async fn set<T: Serialize>(&self, key: &str, value: T) -> Result<(), KeyvError> {
+        let json_value = serde_json::to_value(value).map_err(|e| StoreError::SerializationError { source: e })?;
+        self.store.set(key, json_value, None).await?;
+        Ok(())
     }
 
     /// Sets a value for a given key with an expiry TTL (Time-To-Live).
@@ -132,8 +145,8 @@ impl Keyv {
     /// let keyv = Keyv::default();
     /// keyv.set_with_ttl("temp_key", "temp_value", 3600).unwrap(); // Expires in 1 hour
     /// ```
-    pub fn set_with_ttl<T: Serialize>(&self, key: &str, value: T, ttl: u64) -> Result<(), KeyvError> {
-        Ok(self.store.set(key, json!(value), Some(ttl))?)
+    pub async fn set_with_ttl<T: Serialize>(&self, key: &str, value: T, ttl: u64) -> Result<(), KeyvError> {
+        Ok(self.store.set(key, json!(value), Some(ttl)).await?)
     }
 
     /// Retrieves a value based on a key.
@@ -172,8 +185,8 @@ impl Keyv {
     ///     None => assert!(false),
     /// }
     /// ```
-    pub fn get(&self, key: &str) -> Result<Option<Value>, KeyvError> {
-        Ok(self.store.get(key)?)
+    pub async fn get(&self, key: &str) -> Result<Option<Value>, KeyvError> {
+        Ok(self.store.get(key).await?)
     }
 
     /// Removes a specified key from the store.
@@ -194,8 +207,8 @@ impl Keyv {
     /// let keyv = Keyv::default();
     /// keyv.remove("my_key").unwrap(); // Removes "my_key" from the store
     /// ```
-    pub fn remove(&self, key: &str) -> Result<(), KeyvError> {
-        Ok(self.store.remove(key)?)
+    pub async fn remove(&self, key: &str) -> Result<(), KeyvError> {
+        Ok(self.store.remove(key).await?)
     }
 
     /// Removes multiple keys from the store in one operation.
@@ -216,9 +229,9 @@ impl Keyv {
     /// let keyv = Keyv::default();
     /// keyv.remove_many(&["key1", "key2"]).unwrap(); // Removes "key1" and "key2"
     /// ```
-    pub fn remove_many<T: AsRef<str> + Sync>(&self, keys: &[T]) -> Result<(), KeyvError> {
+    pub async fn remove_many<T: AsRef<str> + Sync>(&self, keys: &[T]) -> Result<(), KeyvError> {
         let keys: Vec<&str> = keys.iter().map(|k| k.as_ref()).collect();
-        Ok(self.store.remove_many(&keys)?)
+        Ok(self.store.remove_many(&keys).await?)
     }
 
     /// Clears the entire store, removing all key-value pairs.
@@ -235,8 +248,8 @@ impl Keyv {
     /// let keyv = Keyv::default();
     /// keyv.clear().unwrap(); // Clears the entire store
     /// ```
-    pub fn clear(&self) -> Result<(), KeyvError> {
-        Ok(self.store.clear()?)
+    pub async fn clear(&self) -> Result<(), KeyvError> {
+        Ok(self.store.clear().await?)
     }
 }
 

@@ -1,3 +1,11 @@
+// Copyright © 2024 Crabby Craft - All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
+// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
+
 /*!
  * Portions of this file are based on code from `chrisllontop/keyv-rust`.
  * MIT Licensed, Copyright (c) 2023 Christian Llontop.
@@ -6,10 +14,10 @@
  */
 
 use serde_json::Value;
+use std::future::Future;
+use std::pin::Pin;
 
-use super::StoreError;
-
-pub trait Store {
+pub trait Store: Send + Sync {
     /// Initializes the storage backend.
     /// This method should perform any necessary setup for the storage backend, such as
     /// establishing database connections or ensuring the existence of required files or schemas.
@@ -17,7 +25,7 @@ pub trait Store {
     /// # Returns
     /// - `Ok(())` on success.
     /// - `Err(StoreError)` if initialisation fails.
-    fn initialize(&self) -> Result<(), StoreError>;
+    fn initialize(&self) -> Pin<Box<dyn Future<Output = Result<(), StoreError>> + Send + '_>>;
 
     /// Retrieves a value associated with a given key from the store.
     ///
@@ -28,7 +36,7 @@ pub trait Store {
     /// - `Ok(Some(Value))` if the key exists and the value is successfully retrieved.
     /// - `Ok(None)` if the key does not exist.
     /// - `Err(StoreError)` if there is an error retrieving the value.
-    fn get(&self, key: &str) -> Result<Option<Value>, StoreError>;
+    fn get(&self, key: &str) -> Pin<Box<dyn Future<Output = Result<Option<Value>, StoreError>> + Send + '_>>;
 
     /// Sets a value for a given key in the store, with an optional time-to-live (TTL).
     ///
@@ -40,7 +48,12 @@ pub trait Store {
     /// # Returns
     /// - `Ok(())` if the value is successfully set.
     /// - `Err(StoreError)` if there is an error setting the value.
-    fn set(&self, key: &str, value: Value, ttl: Option<u64>) -> Result<(), StoreError>;
+    fn set(
+        &self,
+        key: &str,
+        value: Value,
+        ttl: Option<u64>,
+    ) -> Pin<Box<dyn Future<Output = Result<(), StoreError>> + Send + '_>>;
 
     /// Removes a value associated with a given key from the store.
     ///
@@ -50,7 +63,7 @@ pub trait Store {
     /// # Returns
     /// - `Ok(())` if the key exists and the value is successfully removed.
     /// - `Err(StoreError)` if there is an error removing the value.
-    fn remove(&self, key: &str) -> Result<(), StoreError>;
+    fn remove(&self, key: &str) -> Pin<Box<dyn Future<Output = Result<(), StoreError>> + Send + '_>>;
 
     /// Removes multiple values associated with the given keys from the store.
     ///
@@ -60,12 +73,45 @@ pub trait Store {
     /// # Returns
     /// - `Ok(())` if the values are successfully removed.
     /// - `Err(StoreError)` if there is an error removing the values.
-    fn remove_many(&self, keys: &[&str]) -> Result<(), StoreError>;
+    fn remove_many(&self, keys: &[&str]) -> Pin<Box<dyn Future<Output = Result<(), StoreError>> + Send + '_>>;
 
     /// Clears all values from the store.
     ///
     /// # Returns
     /// - `Ok(())` if the store is successfully cleared.
     /// - `Err(StoreError)` if there is an error clearing the store.
-    fn clear(&self) -> Result<(), StoreError>;
+    fn clear(&self) -> Pin<Box<dyn Future<Output = Result<(), StoreError>> + Send + '_>>;
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum KeyvError {
+    #[error("Store error: {0}")]
+    StoreError(#[from] StoreError),
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum StoreError {
+    #[error("Failed to connect to the database backend: {0}")]
+    ConnectionError(String),
+
+    #[error("Error while serializing or deserializing data")]
+    SerializationError {
+        #[from]
+        source: serde_json::Error,
+    },
+
+    #[error("Database operation failed")]
+    DatabaseError {
+        #[source]
+        source: Box<dyn std::error::Error + Send + Sync>,
+    },
+
+    #[error("Database query error: {0}")]
+    QueryError(String),
+
+    #[error("The requested key was not found")]
+    NotFound,
+
+    #[error("An unknown error has occurred")]
+    Unknown,
 }
