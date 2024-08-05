@@ -21,10 +21,8 @@ use std::pin::Pin;
 use std::sync::Arc;
 use std::time::Instant;
 
-use crate::keyv::StoreModel;
-
-use super::DEFAULT_NAMESPACE_NAME;
-use super::{Store, StoreError};
+use crate::keyv::DEFAULT_NAMESPACE_NAME;
+use crate::keyv::{Store, StoreError, StoreModel};
 
 /// Builder for creating a `KeyvStore`.
 ///
@@ -290,7 +288,7 @@ impl Store for KeyvStore {
         key: &str,
         value: Value,
         _ttl: Option<u64>,
-    ) -> Pin<Box<dyn Future<Output = Result<(), StoreError>> + Send + '_>> {
+    ) -> Pin<Box<dyn Future<Output = Result<Option<StoreModel>, StoreError>> + Send + '_>> {
         let query = format!(
             "INSERT INTO {} (key, value) VALUES (?1, ?2) ON CONFLICT(key) DO UPDATE SET value = EXCLUDED.value",
             self.get_table_name()
@@ -314,14 +312,38 @@ impl Store for KeyvStore {
                 .await
                 .map_err(|_| StoreError::QueryError("Failed to set the statement".to_string()))?;
 
-            stmt.execute(params![key.clone(), value_str.clone()])
+            let mut response = stmt
+                .query(params![key.clone(), value_str.clone()])
                 .await
                 .map_err(|_| StoreError::QueryError("Failed to set the value".to_string()))?;
+
+            let result = match response
+                .next()
+                .await
+                .map_err(|e| StoreError::QueryError(format!("Failed to iterate rows: {:?}", e)))?
+            {
+                Some(row) => {
+                    let row_key = row
+                        .get_str(0)
+                        .map_err(|e| StoreError::QueryError(format!("Failed to get the key: {:?}", e)))?;
+
+                    let row_value = row
+                        .get_value(1)
+                        .map_err(|e| StoreError::QueryError(format!("Failed to get the value: {:?}", e)))?;
+
+                    Some(StoreModel {
+                        key: row_key.to_string(),
+                        value: serde_json::to_value(row_value)
+                            .map_err(|e| StoreError::SerializationError { source: e })?,
+                    })
+                }
+                None => None,
+            };
 
             let duration = start.elapsed();
             log::debug!("Keyv store set: {:?} | {} | {}", duration, key, value_str);
 
-            Ok(())
+            Ok(result)
         })
     }
 

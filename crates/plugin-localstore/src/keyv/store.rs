@@ -67,7 +67,7 @@ pub trait Store: Send + Sync {
         key: &str,
         value: Value,
         ttl: Option<u64>,
-    ) -> Pin<Box<dyn Future<Output = Result<(), StoreError>> + Send + '_>>;
+    ) -> Pin<Box<dyn Future<Output = Result<Option<StoreModel>, StoreError>> + Send + '_>>;
 
     /// Removes a value associated with a given key from the store.
     ///

@@ -14,10 +14,10 @@
  */
 
 use serde::Serialize;
-use serde_json::{json, Value};
-use std::sync::Arc;
+use serde_json::Value;
+use std::{path::Path, sync::Arc};
 
-use super::{KeyvError, Store, StoreError, StoreModel};
+use super::{KeyvError, KeyvStoreBuilder, Store, StoreError, StoreModel};
 
 pub(super) const DEFAULT_NAMESPACE_NAME: &str = "localstore";
 
@@ -65,7 +65,6 @@ pub(super) const DEFAULT_NAMESPACE_NAME: &str = "localstore";
 /// }
 /// ```
 pub struct Keyv {
-    // store: Arc<Box<dyn Store>>,
     store: Arc<dyn Store>,
 }
 
@@ -120,10 +119,9 @@ impl Keyv {
     /// let keyv = Keyv::default();
     /// keyv.set("key", "hello world").unwrap();
     /// ```
-    pub async fn set<T: Serialize>(&self, key: &str, value: T) -> Result<(), KeyvError> {
+    pub async fn set<T: Serialize>(&self, key: &str, value: T) -> Result<Option<StoreModel>, KeyvError> {
         let json_value = serde_json::to_value(value).map_err(|e| StoreError::SerializationError { source: e })?;
-        self.store.set(key, json_value, None).await?;
-        Ok(())
+        Ok(self.store.set(key, json_value, None).await?)
     }
 
     /// Sets a value for a given key with an expiry TTL (Time-To-Live).
@@ -145,8 +143,14 @@ impl Keyv {
     /// let keyv = Keyv::default();
     /// keyv.set_with_ttl("temp_key", "temp_value", 3600).unwrap(); // Expires in 1 hour
     /// ```
-    pub async fn set_with_ttl<T: Serialize>(&self, key: &str, value: T, ttl: u64) -> Result<(), KeyvError> {
-        Ok(self.store.set(key, json!(value), Some(ttl)).await?)
+    pub async fn set_with_ttl<T: Serialize>(
+        &self,
+        key: &str,
+        value: T,
+        ttl: u64,
+    ) -> Result<Option<StoreModel>, KeyvError> {
+        let json_value = serde_json::to_value(value).map_err(|e| StoreError::SerializationError { source: e })?;
+        Ok(self.store.set(key, json_value, Some(ttl)).await?)
     }
 
     /// Retrieves a value based on a key.
@@ -273,11 +277,19 @@ impl Keyv {
     }
 }
 
-// FIXME : implement default store
-// impl Default for Keyv {
-//     fn default() -> Self {
-//         Self {
-//             store: Arc::new(Connection::open("sqlite::memory:")),
-//         }
-//     }
-// }
+/// Provides a default implementation for the `Keyv` struct, which creates an in-memory store.
+/// This is useful for quickly setting up a `Keyv` instance without needing to configure a
+/// specific storage backend.
+impl Default for Keyv {
+    fn default() -> Self {
+        let runtime = tokio::runtime::Runtime::new().expect("Failed to create async runtime");
+        let store = runtime.block_on(async {
+            KeyvStoreBuilder::new()
+                .uri(Path::new(":memory:"))
+                .build()
+                .await
+                .expect("Failed to build KeyvStore")
+        });
+        Self { store: Arc::new(store) }
+    }
+}
