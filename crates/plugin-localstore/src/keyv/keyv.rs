@@ -19,7 +19,7 @@ use std::{path::Path, sync::Arc};
 
 use super::{KeyvError, KeyvStoreBuilder, Store, StoreError, StoreModel};
 
-pub(super) const DEFAULT_NAMESPACE_NAME: &str = "localstore";
+pub(super) const DEFAULT_NAMESPACE_NAME: &str = "kv_store";
 
 /// Key-Value Store Interface
 ///

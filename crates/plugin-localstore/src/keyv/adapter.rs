@@ -13,7 +13,7 @@
  * Credits to Alexandru Bereghici: https://github.com/chrisllontop/keyv-rust
  */
 
-use libsql::{params, Builder, Connection};
+use libsql::{params, params_from_iter, Builder, Connection};
 use serde_json::Value;
 use std::future::Future;
 use std::path::PathBuf;
@@ -373,27 +373,31 @@ impl Store for KeyvStore {
         })
     }
 
-    fn remove_many(&self, _keys: &[&str]) -> Pin<Box<dyn Future<Output = Result<(), StoreError>> + Send + '_>> {
-        // let query = format!(
-        //     "DELETE FROM {} WHERE key IN ({})",
-        //     self.get_table_name(),
-        //     keys.iter().map(|_| "?").collect::<Vec<&str>>().join(",")
-        // );
+    fn remove_many(&self, keys: &[&str]) -> Pin<Box<dyn Future<Output = Result<(), StoreError>> + Send + '_>> {
+        let conn = &*self.connnection;
 
-        // let mut query = sqlx::query(&query);
-        // for key in keys {
-        //     query = query.bind(key);
-        // }
+        let placeholder = keys
+            .iter()
+            .enumerate()
+            .map(|(i, _)| format!("?{}", i + 1))
+            .collect::<Vec<String>>()
+            .join(", ");
+
+        let query = format!("DELETE FROM {} WHERE key IN ({})", self.get_table_name(), placeholder);
+
+        let keys = keys.iter().map(|k| k.to_string()).collect::<Vec<String>>();
 
         Box::pin(async move {
             let start = Instant::now();
 
-            // query
-            //     .execute(&*self.connnection)
-            //
-            //     .map_err(|e| StoreError::QueryError(format!("Failed to remove the keys: {}", e.to_string())))?;
+            let mut stmt = conn
+                .prepare(&query)
+                .await
+                .map_err(|_| StoreError::QueryError("Failed to set the statement".to_string()))?;
 
-            // let conn = &*self.connnection;
+            stmt.execute(params_from_iter(keys))
+                .await
+                .map_err(|_| StoreError::QueryError("Failed to remove the key".to_string()))?;
 
             let duration = start.elapsed();
             log::debug!("Keyv store remove_many: {:?}", duration);
