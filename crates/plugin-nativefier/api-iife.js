@@ -7,5 +7,5 @@
 // except according to those terms.
 
 if ('__TAURI__' in window) {
-  window.__TAURI__.customizer = {}
+  window.__TAURI__.nativefier = {}
 }

@@ -24,7 +24,7 @@ use tauri::plugin::TauriPlugin;
 use tauri::Runtime;
 
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
-    PluginBuilder::new("customizer")
+    PluginBuilder::new("nativefier")
         .setup(|_app, _api| Ok(()))
         .invoke_handler(tauri::generate_handler![
             cmd::list_font_mono,

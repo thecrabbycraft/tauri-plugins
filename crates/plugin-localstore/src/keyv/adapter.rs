@@ -13,7 +13,8 @@
  * Credits to Alexandru Bereghici: https://github.com/chrisllontop/keyv-rust
  */
 
-use libsql::{params, params_from_iter, Builder, Connection};
+use libsql::{params, params_from_iter};
+use libsql::{Builder, Connection};
 use serde_json::Value;
 use std::future::Future;
 use std::path::PathBuf;

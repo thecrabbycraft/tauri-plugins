@@ -20,7 +20,7 @@ tauri-plugin = { version = "2.0.0-rc.0", features = ["build"] }
 
 [dependencies]
 tauri = { version = "2.0.0-rc.0", features = [] }
-libsql = { version = "0.4", features = [ "parser", "serde" ] }
+libsql = { version = "0.5", features = [ "parser", "serde" ] }
 tokio = { version = "1.39", features = [] }
 
 # Shared dependencies

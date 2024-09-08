@@ -1,6 +1,6 @@
 [package]
-name = "tauri-plugin-customizer"
-links = "tauri-plugin-customizer"
+name = "tauri-plugin-nativefier"
+links = "tauri-plugin-nativefier"
 description = "Tauri plugin for customizing the application UI"
 version = "0.0.0"
 authors = ["Aris Ripandi <aris@crabbycraft.com>"]
